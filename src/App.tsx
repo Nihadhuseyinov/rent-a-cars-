@@ -47,7 +47,9 @@ import {
   LogOut,
   Send,
   MessageSquare,
-  Bot
+  Bot,
+  Zap,
+  Eye
 } from "lucide-react";
 
 // --- COMPATIBILITY WRAPPERS (To replace Next.js features in Vite) ---
@@ -173,7 +175,8 @@ const TRANSLATIONS = {
     fuel: "Yanacaq",
     editCar: "Avtomobilə Düzəliş Et",
     save: "Yadda Saxla",
-    all: "Hamısı"
+    all: "Hamısı",
+    vip: "VIP"
   },
   en: {
     home: "Home", fleet: "Our Fleet", about: "About", blog: "Blog", contact: "Contact", signIn: "Sign In",
@@ -187,7 +190,18 @@ const TRANSLATIONS = {
     aiBotTitle: "Elite Assistant", aiBotPlaceholder: "Ask me anything about Elite Drive...",
     desc: "Azerbaijan's premier luxury car rental service.",
     allRights: "All rights reserved.",
-    faq: "Frequently Asked Questions"
+    faq: "Frequently Asked Questions",
+    verificationSent: "Verification code sent to your email",
+    verify: "Verify",
+    resend: "Resend",
+    category: "Category",
+    fuel: "Fuel",
+    editCar: "Edit Vehicle",
+    save: "Save",
+    all: "All",
+    vip: "VIP",
+    seats: "Seats",
+    perDay: "Per Day"
   },
   ru: {
     home: "Главная", fleet: "Наш Флот", about: "О нас", blog: "Блог", contact: "Контакт", signIn: "Войти",
@@ -201,21 +215,43 @@ const TRANSLATIONS = {
     aiBotTitle: "Elite Assistant", aiBotPlaceholder: "Спросите меня об Elite Drive...",
     desc: "Премьер-сервис по прокату роскошных автомобилей в Азербайджане.",
     allRights: "Все права защищены.",
-    faq: "Часто задаваемые вопросы"
+    faq: "Часто задаваемые вопросы",
+    verificationSent: "Код подтверждения отправлен на вашу почту",
+    verify: "Подтвердить",
+    resend: "Отправить снова",
+    category: "Категория",
+    fuel: "Топливо",
+    editCar: "Редактировать",
+    save: "Сохранить",
+    all: "Все",
+    vip: "VIP",
+    seats: "Мест",
+    perDay: "За день"
   },
   tr: {
     home: "Ana Sayfa", fleet: "Filomuz", about: "Hakkımızda", blog: "Blog", contact: "İletişim", signIn: "Giriş Yap",
     bookNow: "Şimdi Rezervasyon Yap", heroTitle: "Bakü'de Mükemmelliği Yaşayın", exploreFleet: "Filoyu Keşfet",
-    aboutTitle: "Elite Drive Hakkında", blogTitle: "Son Haberler", contactTitle: "Bizimle İletişime Geçin",
-    phone: "Telefon", address: "Adres", email: "E-posta", adminPanel: "Yönetim Paneli", addCar: "Araba Ekle",
-    howItWorks: "Nasıl Çalışır", testimonials: "Yorumlar", newsletter: "Haber Bülteni",
+    aboutTitle: "Elite Drive Hakkında", blogTitle: "Son Haberler", contactTitle: "Bize Ulaşın",
+    phone: "Telefon", address: "Adres", email: "E-posta", adminPanel: "Yönetici Paneli", addCar: "Araç Ekle",
+    howItWorks: "Nasıl Çalışır", testimonials: "Yorumlar", newsletter: "Bülten",
     fleetTitle: "Öne Çıkan Filo", fleetDesc: "Olağanüstü bir deneyim için özenle seçilmiş lüks araçlar.",
-    subscribe: "Abone Ol", emailPlaceholder: "E-postanızı girin",
-    subSuccess: "Başarılı! Artık bir Elite Club üyesisiniz.",
-    aiBotTitle: "Elite Assistant", aiBotPlaceholder: "Elite Drive hakkında bana bir şey sor...",
-    desc: "Azerbaycan'ın önde gelen lüks araç kiralama hizmeti.",
+    subscribe: "Abone Ol", emailPlaceholder: "E-posta adresinizi girin",
+    subSuccess: "Tebrikler! Artık Elite Club üyesisiniz.",
+    aiBotTitle: "Elite Asistan", aiBotPlaceholder: "Elite Drive hakkında bana her şeyi sorabilirsiniz...",
+    desc: "Azerbaycan'nın önde gelen lüks araç kiralama hizmeti.",
     allRights: "Tüm hakları saklıdır.",
-    faq: "Sıkça Sorulan Sorular"
+    faq: "Sıkça Sorulan Sorular",
+    verificationSent: "Doğrulama kodu e-postanıza gönderildi",
+    verify: "Doğrula",
+    resend: "Tekrar gönder",
+    category: "Kategori",
+    fuel: "Yakıt",
+    editCar: "Aracı Düzenle",
+    save: "Kaydet",
+    all: "Hepsi",
+    vip: "VIP",
+    seats: "Koltuk",
+    perDay: "Günlük"
   },
   ar: {
     home: "الرئيسية", fleet: "أسطولنا", about: "من نحن", blog: "المدونة", contact: "اتصل بنا", signIn: "تسجيل الدخول",
@@ -234,7 +270,7 @@ const TRANSLATIONS = {
 };
 
 const LANGUAGES = [
-  { id: 'az', name: 'AZ', flag: '🇦🇿' },
+  { id: 'az', name: 'Azərbaycan', flag: '🇦🇿' },
   { id: 'en', name: 'EN', flag: '🇺🇸' },
   { id: 'ru', name: 'RU', flag: '🇷🇺' },
   { id: 'tr', name: 'TR', flag: '🇹🇷' },
@@ -1835,37 +1871,76 @@ function ScrollToTop() {
   );
 }
 
-function AuthModal({ isOpen, onClose, onLogin, t }: { isOpen: boolean, onClose: () => void, onLogin: (email: string) => void, t: any }) {
+function AuthModal({ isOpen, onClose, onLogin, users, t }: { 
+  isOpen: boolean, 
+  onClose: () => void, 
+  onLogin: (email: string, pass: string) => void, 
+  users: any[],
+  t: any 
+}) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [step, setStep] = useState(1); // 1: Email, 2: Code
+  const [password, setPassword] = useState("");
+  const [step, setStep] = useState(1); // 1: Email, 2: Code/Pass, 3: Set New Password
   const [isLoading, setIsLoading] = useState(false);
+
+  const isOldUser = users.find(u => u.email === email);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate sending code
     setTimeout(() => {
       setIsLoading(false);
-      setStep(2);
-      alert("Verification code: 1234 (Simulation)");
-    }, 1500);
+      if (isOldUser) {
+        setStep(2); // Ask for password
+      } else {
+        setStep(2); // Ask for verification code first
+        alert("Verification code: 1234 (Simulation)");
+      }
+    }, 1200);
   };
 
-  const handleCodeSubmit = (e: React.FormEvent) => {
+  const handleSecondStepSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (code === "1234") {
-      setIsLoading(true);
-      setTimeout(() => {
-        onLogin(email);
-        setIsLoading(false);
-        onClose();
-        setStep(1);
-        setCode("");
-      }, 1000);
+    if (isOldUser) {
+      // Existing user entered password
+      if (password.length >= 8) {
+        if (password === isOldUser.password) {
+          onLogin(email, password);
+          onClose();
+          reset();
+        } else {
+          alert("Yanlış şifrə.");
+        }
+      } else {
+        alert("Şifrə minimum 8 simvol olmalıdır.");
+      }
     } else {
-      alert("Invalid code. Try 1234");
+      // New user entered verification code
+      if (code === "1234") {
+        setStep(3); // Go to set password step
+      } else {
+        alert("Yanlış kod. 1234 yoxlayın.");
+      }
     }
+  };
+
+  const handleSetPassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password.length >= 8) {
+      onLogin(email, password);
+      onClose();
+      reset();
+    } else {
+      alert("Şifrə minimum 8 simvol olmalıdır.");
+    }
+  };
+
+  const reset = () => {
+    setStep(1);
+    setEmail("");
+    setCode("");
+    setPassword("");
   };
 
   return (
@@ -1893,14 +1968,14 @@ function AuthModal({ isOpen, onClose, onLogin, t }: { isOpen: boolean, onClose: 
                 {step === 1 ? <Car className="w-10 h-10" /> : <Shield className="w-10 h-10" />}
               </div>
               <h2 className="text-3xl font-display font-bold text-white italic">
-                {step === 1 ? "Elite" : t('verify')} <span className="gold-text">{step === 1 ? "Access" : "Access"}</span>
+                {step === 1 ? "Elite" : step === 3 ? "Secure" : "Verify"} <span className="gold-text">{step === 1 ? "Access" : "Account"}</span>
               </h2>
               <p className="text-gray-500 text-sm mt-2">
-                {step === 1 ? t('emailPlaceholder') : t('verificationSent')}
+                {step === 1 ? "Luxury experience awaits you" : step === 3 ? "Choose a strong 8-character password" : isOldUser ? "Enter your password to continue" : "Enter the verification code sent to your email"}
               </p>
             </div>
             
-            {step === 1 ? (
+            {step === 1 && (
               <form onSubmit={handleEmailSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">{t('email')}</label>
@@ -1916,40 +1991,212 @@ function AuthModal({ isOpen, onClose, onLogin, t }: { isOpen: boolean, onClose: 
                     />
                   </div>
                 </div>
-                <button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full py-4 gold-bg text-black font-bold rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mt-4 shadow-lg"
-                >
-                  {isLoading ? <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : t('verify')}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleCodeSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Verification Code</label>
-                  <input 
-                    type="text" 
-                    maxLength={4}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    required
-                    placeholder="0000"
-                    className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-4 text-center text-2xl tracking-[1em] text-white focus:outline-none focus:gold-border transition-all"
-                  />
-                </div>
-                <button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full py-4 gold-bg text-black font-bold rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mt-4"
-                >
-                  {isLoading ? <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : t('verify')}
-                </button>
-                <button type="button" onClick={() => setStep(1)} className="w-full text-sm text-gray-500 hover:text-white transition-colors">
-                  {t('resend')}
+                <button type="submit" disabled={isLoading} className="w-full py-4 gold-bg text-black font-bold rounded-xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mt-4">
+                  {isLoading ? <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" /> : "Continue"}
                 </button>
               </form>
             )}
+
+            {step === 2 && (
+              <form onSubmit={handleSecondStepSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    {isOldUser ? "Password" : "Verification Code"}
+                  </label>
+                  <div className="relative">
+                    {isOldUser ? (
+                      <>
+                        <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                        <input 
+                          type="password" 
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                          placeholder="••••••••"
+                          className="w-full bg-black/40 border border-white/5 rounded-xl px-12 py-4 text-white focus:outline-none focus:gold-border transition-all"
+                        />
+                      </>
+                    ) : (
+                      <input 
+                        type="text" 
+                        maxLength={4}
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        required
+                        placeholder="0000"
+                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-4 text-center text-2xl tracking-[1em] text-white focus:outline-none focus:gold-border transition-all"
+                      />
+                    )}
+                  </div>
+                </div>
+                <button type="submit" className="w-full py-4 gold-bg text-black font-bold rounded-xl hover:scale-[1.02] transition-all">
+                  {isOldUser ? "Sign In" : "Confirm Code"}
+                </button>
+                <button type="button" onClick={() => setStep(1)} className="w-full text-sm text-gray-500 hover:text-white transition-colors">
+                  Try another email
+                </button>
+              </form>
+            )}
+
+            {step === 3 && (
+              <form onSubmit={handleSetPassword} className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">New Password (min 8 chars)</label>
+                  <div className="relative">
+                    <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input 
+                      type="password" 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={8}
+                      placeholder="••••••••"
+                      className="w-full bg-black/40 border border-white/5 rounded-xl px-12 py-4 text-white focus:outline-none focus:gold-border transition-all"
+                    />
+                  </div>
+                </div>
+                <button type="submit" className="w-full py-4 gold-bg text-black font-bold rounded-xl hover:scale-[1.02] transition-all">
+                  Finish Registration
+                </button>
+              </form>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function CarGalleryModal({ isOpen, onClose, car, t }: { isOpen: boolean, onClose: () => void, car: any, t: any }) {
+  const [activeImage, setActiveImage] = useState(0);
+  
+  useEffect(() => {
+    setActiveImage(0);
+  }, [car]);
+
+  if (!car) return null;
+
+  const allImages = car.images && car.images.length > 0 ? car.images : [car.image];
+
+  const handleWhatsApp = () => {
+    const message = encodeURIComponent(`Salam, mən ${car.name} avtomobilini sifariş etmək istəyirəm. Qiymət: $${car.pricePerDay}/gün.`);
+    window.open(`https://wa.me/994504619303?text=${message}`, '_blank');
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            onClick={onClose} 
+            className="absolute inset-0 bg-black/95 backdrop-blur-xl" 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }} 
+            animate={{ opacity: 1, scale: 1, y: 0 }} 
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative w-full max-w-6xl bg-[#0F0F0F] rounded-[40px] overflow-hidden gold-border flex flex-col md:flex-row h-[90vh] md:h-[70vh]"
+          >
+            <button onClick={onClose} className="absolute top-6 right-6 z-10 p-3 bg-black/50 text-white rounded-full hover:bg-white/10 transition-all border border-white/10">
+              <X className="w-6 h-6" />
+            </button>
+
+            <div className="flex-1 relative bg-black flex items-center justify-center p-4 md:p-8 overflow-hidden group min-h-[300px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeImage}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.05 }}
+                  transition={{ duration: 0.4 }}
+                  className="w-full h-full relative"
+                >
+                  <Image src={allImages[activeImage]} alt={car.name} fill className="object-contain" />
+                </motion.div>
+              </AnimatePresence>
+
+              {allImages.length > 1 && (
+                <>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev === 0 ? allImages.length - 1 : prev - 1)); }}
+                    className="absolute left-6 p-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/5 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <ChevronLeft className="w-8 h-8" />
+                  </button>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); setActiveImage((prev) => (prev === allImages.length - 1 ? 0 : prev + 1)); }}
+                    className="absolute right-6 p-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/5 opacity-0 group-hover:opacity-100 transition-all"
+                  >
+                    <ChevronRight className="w-8 h-8" />
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="w-full md:w-[400px] p-6 md:p-10 flex flex-col bg-[#0A0A0A] border-l border-white/5 overflow-y-auto">
+               <div className="mb-8">
+                 <div className="flex items-center gap-2 mb-3">
+                   <span className="px-3 py-1 rounded-full bg-gold/10 gold-text text-[10px] font-bold uppercase tracking-widest border border-gold/20">{car.category || t('vip')}</span>
+                   <div className="flex items-center gap-1 text-gold ml-auto">
+                     <Star className="w-3 h-3 fill-current" />
+                     <span className="text-xs font-bold">{car.rating || "5.0"}</span>
+                   </div>
+                 </div>
+                 <h2 className="text-3xl md:text-4xl font-display font-bold text-white italic leading-tight">{car.name}</h2>
+                 <p className="text-gray-500 mt-2 font-medium">Baku Premium Rentals</p>
+               </div>
+
+               <div className="grid grid-cols-2 gap-4 mb-8">
+                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                   <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-1">{t('seats')}</span>
+                   <div className="flex items-center gap-2 text-white font-bold">
+                     <Users className="w-4 h-4 gold-text" /> {car.seats || 4}
+                   </div>
+                 </div>
+                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                   <span className="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-1">{t('fuel')}</span>
+                   <div className="flex items-center gap-2 text-white font-bold">
+                     <Zap className="w-4 h-4 gold-text" /> {car.fuel || "Petrol"}
+                   </div>
+                 </div>
+               </div>
+
+               <div className="mt-auto">
+                 <div className="flex items-end justify-between mb-6">
+                    <div>
+                      <span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest block mb-1">{t('perDay')}</span>
+                      <div className="text-3xl font-display font-bold text-white italic">${car.pricePerDay} <span className="text-sm font-sans text-gray-500">/ day</span></div>
+                    </div>
+                 </div>
+                 <button 
+                  onClick={handleWhatsApp}
+                  className="w-full py-5 gold-bg text-black font-bold rounded-2xl hover:scale-[1.02] active:scale-95 transition-all text-lg shadow-2xl shadow-gold/20 flex items-center justify-center gap-3"
+                 >
+                   <MessageSquare className="w-6 h-6" />
+                   {t('bookNow')}
+                 </button>
+               </div>
+
+               {allImages.length > 1 && (
+                 <div className="mt-10">
+                   <p className="text-[10px] text-gray-600 uppercase tracking-widest font-bold mb-4">Gallery</p>
+                   <div className="grid grid-cols-4 gap-2">
+                     {allImages.map((img, i) => (
+                       <button 
+                         key={i} 
+                         onClick={() => setActiveImage(i)}
+                         className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-all ${activeImage === i ? 'border-gold scale-95' : 'border-transparent opacity-40 hover:opacity-100'}`}
+                       >
+                         <Image src={img} alt="" fill className="object-cover" />
+                       </button>
+                     ))}
+                   </div>
+                 </div>
+               )}
+            </div>
           </motion.div>
         </div>
       )}
@@ -1962,10 +2209,19 @@ export default function App() {
   const scaleX = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
   const [lang, setLang] = useState<keyof typeof TRANSLATIONS>('az');
+  const [users, setUsers] = useState<any[]>(() => {
+    const saved = localStorage.getItem('elite_drive_users');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<any>(null);
   const [carsState, setCarsState] = useState(FEATURED_CARS);
+
+  useEffect(() => {
+    localStorage.setItem('elite_drive_users', JSON.stringify(users));
+  }, [users]);
 
   const t = (key: keyof typeof TRANSLATIONS['az']) => {
     return TRANSLATIONS[lang][key] || key;
@@ -1975,9 +2231,26 @@ export default function App() {
     setIsAuthModalOpen(true);
   };
 
-  const onLogin = (email: string) => {
+  const onLogin = (email: string, password: string) => {
+    const existing = users.find(u => u.email === email);
+    let currentUser;
+
+    if (existing) {
+       currentUser = existing;
+    } else {
+       const newId = 1001 + users.length;
+       currentUser = { 
+         email, 
+         password, 
+         id: newId, 
+         name: email.split('@')[0],
+         badge: `#${newId}` 
+       };
+       setUsers(prev => [...prev, currentUser]);
+    }
+
+    setUser(currentUser);
     const isSuper = email.trim().toLowerCase() === 'nihadhuseynovtt@gmail.com';
-    setUser({ email, name: email.split('@')[0] });
     if(isSuper) setIsAdmin(true);
   };
 
@@ -2021,6 +2294,7 @@ export default function App() {
           isOpen={isAuthModalOpen} 
           onClose={() => setIsAuthModalOpen(false)} 
           onLogin={onLogin} 
+          users={users}
           t={t} 
         />
         
@@ -2047,12 +2321,18 @@ export default function App() {
                   key={car.id}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  className="bento-card overflow-hidden hover:gold-border transition-all duration-500 p-0 group"
+                  onClick={() => setSelectedCar(car)}
+                  className="bento-card overflow-hidden hover:gold-border transition-all duration-500 p-0 group cursor-pointer"
                 >
                   <div className="relative h-64 overflow-hidden rounded-t-[24px]">
                     <Image src={car.image} alt={car.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                    <div className="absolute top-4 left-4">
-                      {car.isPremium && <span className="px-3 py-1 gold-bg text-black text-[10px] font-bold rounded-full uppercase tracking-tighter">PREMIUM</span>}
+                    <div className="absolute top-4 left-4 flex flex-col gap-2">
+                      {car.isPremium && <span className="px-3 py-1 gold-bg text-black text-[10px] font-bold rounded-full uppercase tracking-tighter shadow-xl">PREMIUM</span>}
+                    </div>
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                       <div className="w-12 h-12 rounded-full bg-gold/90 text-black flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500 shadow-2xl">
+                          <Eye className="w-6 h-6" />
+                       </div>
                     </div>
                   </div>
                   <div className="p-6">
@@ -2066,8 +2346,18 @@ export default function App() {
                       <span className="flex items-center gap-1"><Fuel className="w-4 h-4" />{car.fuel}</span>
                     </div>
                     <div className="flex items-end justify-between pt-4 border-t border-white/5">
-                      <span className="text-2xl font-bold text-white">${car.pricePerDay}<span className="text-sm text-gray-500 font-normal">/day</span></span>
-                      <Link href="#cars" className="px-5 py-2.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-white hover:gold-bg hover:text-black transition-all">Book Now</Link>
+                      <span className="text-2xl font-bold text-white italic">${car.pricePerDay}<span className="text-sm text-gray-500 font-normal">/day</span></span>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const message = encodeURIComponent(`Salam, mən ${car.name} avtomobilini sifariş etmək istəyirəm.`);
+                          window.open(`https://wa.me/994504619303?text=${message}`, '_blank');
+                        }}
+                        className="px-5 py-2.5 gold-bg text-black rounded-full text-xs font-bold hover:scale-110 transition-all flex items-center gap-2"
+                      >
+                        <MessageSquare className="w-3 h-3" />
+                        {t('bookNow')}
+                      </button>
                     </div>
                   </div>
                 </motion.div>
@@ -2092,6 +2382,12 @@ export default function App() {
         <Footer t={t} />
         <WhatsAppFloat />
         <AIChatBot t={t} lang={lang} fleet={carsState} />
+        <CarGalleryModal 
+          isOpen={!!selectedCar} 
+          onClose={() => setSelectedCar(null)} 
+          car={selectedCar} 
+          t={t} 
+        />
         <ScrollToTop />
       </div>
     </LoadingScreen>
