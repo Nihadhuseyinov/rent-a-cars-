@@ -2067,7 +2067,14 @@ function AuthModal({ isOpen, onClose, onLogin, users, t }: {
   );
 }
 
-function CarGalleryModal({ isOpen, onClose, car, t }: { isOpen: boolean, onClose: () => void, car: any, t: any }) {
+function CarGalleryModal({ isOpen, onClose, car, user, onAuthRequired, t }: { 
+  isOpen: boolean, 
+  onClose: () => void, 
+  car: any, 
+  user: any,
+  onAuthRequired: () => void,
+  t: any 
+}) {
   const [activeImage, setActiveImage] = useState(0);
   
   useEffect(() => {
@@ -2079,6 +2086,10 @@ function CarGalleryModal({ isOpen, onClose, car, t }: { isOpen: boolean, onClose
   const allImages = car.images && car.images.length > 0 ? car.images : [car.image];
 
   const handleWhatsApp = () => {
+    if (!user) {
+      onAuthRequired();
+      return;
+    }
     const message = encodeURIComponent(`Salam, mən ${car.name} avtomobilini sifariş etmək istəyirəm. Qiymət: $${car.pricePerDay}/gün.`);
     window.open(`https://wa.me/994504619303?text=${message}`, '_blank');
   };
@@ -2350,6 +2361,10 @@ export default function App() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
+                          if (!user) {
+                            setIsAuthModalOpen(true);
+                            return;
+                          }
                           const message = encodeURIComponent(`Salam, mən ${car.name} avtomobilini sifariş etmək istəyirəm.`);
                           window.open(`https://wa.me/994504619303?text=${message}`, '_blank');
                         }}
@@ -2386,6 +2401,11 @@ export default function App() {
           isOpen={!!selectedCar} 
           onClose={() => setSelectedCar(null)} 
           car={selectedCar} 
+          user={user}
+          onAuthRequired={() => {
+            setSelectedCar(null);
+            setIsAuthModalOpen(true);
+          }}
           t={t} 
         />
         <ScrollToTop />
